@@ -1,3 +1,7 @@
+# IDEAs folders
+.idea/
+.vc/
+.vscode/
 # C++ objects and libs
 *.slo
 *.lo
