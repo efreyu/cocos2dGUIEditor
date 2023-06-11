@@ -10,8 +10,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Network LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Network LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
 
 set(APP_HEADER)
 set(APP_SOURCE)
@@ -56,7 +56,9 @@ else()
 
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${APP_TRANSLATION})
 endif()
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System)
+target_include_directories(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System/src")
+target_link_libraries(${APP_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
 target_link_libraries(${APP_NAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
@@ -64,6 +66,7 @@ target_link_libraries(${APP_NAME} PRIVATE
         )
 
 set_target_properties(${APP_NAME} PROPERTIES
+        CXX_STANDARD 17
         MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
