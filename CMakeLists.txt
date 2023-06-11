@@ -1,35 +1,21 @@
-#/****************************************************************************
-# Copyright (c) 2013-2014 cocos2d-x.org
-# Copyright (c) 2021-2022 Bytedance Inc.
-#
-# https://axmolengine.github.io/
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+cmake_minimum_required(VERSION 3.13)
 
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+set(APP_NAME cocos2dGame)
+set(APP_VERSION 0.1)
 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
-# ****************************************************************************/
+option(QT_EDITOR "Build with QT editor" ON)
 
-cmake_minimum_required(VERSION 3.10)
+if (APPLE)
+    # pure cmake project without xcode cannot detect objc/objcxx automatically
+    project(${APP_NAME} VERSION ${APP_VERSION} LANGUAGES C CXX OBJC OBJCXX)
+else()
+    project(${APP_NAME} VERSION ${APP_VERSION})
+endif()
 
-set(APP_NAME cocos2dGUIEditor)
+# Disable Axmol extension
+set(AX_ENABLE_EXT_FAIRYGUI OFF CACHE "" INTERNAL FORCE)
 
-project(${APP_NAME})
-
-if(NOT DEFINED BUILD_ENGINE_DONE) # to test cocos2dGUIEditor into root project
+if(NOT DEFINED BUILD_ENGINE_DONE) # to test cocos2dGame into root project
     if(XCODE)
         set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
     endif()
@@ -66,6 +52,7 @@ endif()
 # record sources, headers, resources...
 set(GAME_SOURCE)
 set(GAME_HEADER)
+set(GAME_DEFINITIONS)
 
 set(GAME_RES_FOLDER
     "${CMAKE_CURRENT_SOURCE_DIR}/Resources"
@@ -74,16 +61,29 @@ if(APPLE OR WINDOWS)
     ax_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
 endif()
 
+set(GAME_DEFINITIONS ${GAME_DEFINITIONS} -DCMAKE_APP_NAME="${APP_NAME}") #todo check this later
+set(GAME_DEFINITIONS ${GAME_DEFINITIONS} -DCMAKE_APP_VERSION="${APP_VERSION}") #todo check this later
+#add_definitions(-DCMAKE_APP_NAME="${APP_NAME}")
+
 # add cross-platforms source files and header files
-file(GLOB_RECURSE GAME_SOURCE
-     Classes/*.cpp
-     )
+list(APPEND GAME_HEADER
+    Classes/AppDelegate.h
+    Classes/HelloWorldScene.h
+    )
+list(APPEND GAME_SOURCE
+    Classes/AppDelegate.cpp
+    Classes/HelloWorldScene.cpp
+    )
 
-file(GLOB_RECURSE GAME_HEADER
-     Classes/*.h
-     )
+# note place here your add_subdirectory()
 
-if(ANDROID)
+
+# applying definitions from generic
+add_definitions(${GAME_DEFINITIONS})
+
+if (QT_EDITOR)
+    list(APPEND GAME_SOURCE ${common_res_files})
+elseif(ANDROID)
     # the APP_NAME should match on AndroidManifest.xml
     list(APPEND GAME_SOURCE
          proj.android/app/jni/main.cpp
@@ -166,6 +166,8 @@ target_include_directories(${APP_NAME}
         PRIVATE Classes
         PRIVATE ${_AX_ROOT_PATH}/core/audio
 )
+target_compile_features(${APP_NAME} PRIVATE cxx_std_17)
+target_compile_options(${APP_NAME} PRIVATE -Wall)
 
 # mark app resources
 setup_ax_app_config(${APP_NAME})
@@ -213,4 +215,10 @@ if (_AX_USE_PREBUILT) # support windows and linux
 
     include(${_AX_ROOT_PATH}/cmake/Modules/AXLinkHelpers.cmake)
     ax_link_cxx_prebuilt(${APP_NAME} ${_AX_ROOT_PATH} ${AX_PREBUILT_DIR})
+endif()
+
+if(MACOSX OR WINDOWS)
+    if (QT_EDITOR)
+        add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/proj.qt)
+    endif()
 endif()

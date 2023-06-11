@@ -1,17 +1,23 @@
 cmake_minimum_required(VERSION 3.5)
+set(APP_NAME "${APP_NAME}-Editor")
+set(APP_VERSION ${APP_VERSION})
 
-set(APP_NAME cocos2dGUIEditor) # cocos2dGUIEditor
-project(${APP_NAME} VERSION 0.1 LANGUAGES CXX)
+project(${APP_NAME} VERSION ${APP_VERSION} LANGUAGES CXX)
+
+# IMPORTANT, this option should be enabled only for Mac/Win build
+set(GAME_DEFINITIONS ${GAME_DEFINITIONS} -DQT_EDITOR)
+set(GAME_DEFINITIONS ${GAME_DEFINITIONS} -DAX_USE_COMPAT_GL=1) #Only OpenGL is supported in Qt
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers.cmake) #Helper functions
 
 set(APP_HEADER)
 set(APP_SOURCE)
@@ -23,13 +29,24 @@ file(GLOB_RECURSE APP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE APP_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui)
 file(GLOB_RECURSE APP_TRANSLATION ${CMAKE_CURRENT_SOURCE_DIR}/translation/*.ts)
 
+#todo continue this
+message(FATAL_ERROR ${GAME_DEFINITIONS})
+
+MakeReadableListOfSources(APP_HEADER)
+MakeReadableListOfSources(APP_SOURCE)
+MakeReadableListOfSources(APP_UI)
+MakeReadableListOfSources(APP_TRANSLATION)
+
+set(GAME_HEADER ${GAME_HEADER} "" PARENT_SCOPE)
+set(GAME_SOURCE ${GAME_SOURCE} "" PARENT_SCOPE)
 set(PROJECT_SOURCES
         ${APP_HEADER}
         ${APP_SOURCE}
         ${APP_UI}
         ${APP_TRANSLATION}
+        ${GAME_HEADER}
+        ${GAME_SOURCE}
         )
-
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${APP_NAME}
             MANUAL_FINALIZATION
@@ -42,23 +59,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${APP_TRANSLATION})
 else()
-    if(ANDROID)
-        add_library(${APP_NAME} SHARED
-                ${PROJECT_SOURCES}
-                )
-        # Define properties for Android with Qt 5 after find_package() calls as:
-        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(${APP_NAME}
-                ${PROJECT_SOURCES}
-                )
-    endif()
-
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${APP_TRANSLATION})
+    message(FATAL_ERROR "This project supports only Qt6 or higher")
 endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System)
-target_include_directories(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System/src")
-target_link_libraries(${APP_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System)
+#target_include_directories(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System/src")
+#target_link_libraries(${APP_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
 target_link_libraries(${APP_NAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
