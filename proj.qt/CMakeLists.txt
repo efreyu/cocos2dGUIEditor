@@ -52,18 +52,14 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             MANUAL_FINALIZATION
             ${PROJECT_SOURCES}
             )
-    # Define target properties for Android with Qt 6 as:
-    #    set_property(TARGET ${APP_NAME} APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${APP_TRANSLATION})
 else()
     message(FATAL_ERROR "This project supports only Qt6 or higher")
 endif()
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System)
-#target_include_directories(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System/src")
-#target_link_libraries(${APP_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System)
+target_include_directories(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Qt-Advanced-Docking-System/src")
+target_link_libraries(${APP_NAME} PRIVATE qt${QT_VERSION_MAJOR}advanceddocking)
 target_link_libraries(${APP_NAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
