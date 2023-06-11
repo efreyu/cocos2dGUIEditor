@@ -25,11 +25,11 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-set(APP_NAME axmolProjectExample)
+set(APP_NAME cocos2dGUIEditor)
 
 project(${APP_NAME})
 
-if(NOT DEFINED BUILD_ENGINE_DONE) # to test axmolProjectExample into root project
+if(NOT DEFINED BUILD_ENGINE_DONE) # to test cocos2dGUIEditor into root project
     if(XCODE)
         set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
     endif()
