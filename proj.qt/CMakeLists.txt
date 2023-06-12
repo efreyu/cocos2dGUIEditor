@@ -17,7 +17,6 @@ set(CMAKE_AUTORCC ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Gui Widgets Network LinguistTools)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/helpers.cmake) #Helper functions
 
 set(APP_HEADER)
 set(APP_SOURCE)
@@ -29,24 +28,17 @@ file(GLOB_RECURSE APP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE APP_UI ${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui)
 file(GLOB_RECURSE APP_TRANSLATION ${CMAKE_CURRENT_SOURCE_DIR}/translation/*.ts)
 
-#todo continue this
-message(FATAL_ERROR ${GAME_DEFINITIONS})
-
-MakeReadableListOfSources(APP_HEADER)
-MakeReadableListOfSources(APP_SOURCE)
-MakeReadableListOfSources(APP_UI)
-MakeReadableListOfSources(APP_TRANSLATION)
-
-set(GAME_HEADER ${GAME_HEADER} "" PARENT_SCOPE)
-set(GAME_SOURCE ${GAME_SOURCE} "" PARENT_SCOPE)
+set(QT_EDITOR_GAME_HEADER ${QT_EDITOR_GAME_HEADER} "" PARENT_SCOPE)
+set(QT_EDITOR_GAME_SOURCE ${QT_EDITOR_GAME_SOURCE} "" PARENT_SCOPE)
 set(PROJECT_SOURCES
         ${APP_HEADER}
         ${APP_SOURCE}
         ${APP_UI}
         ${APP_TRANSLATION}
-        ${GAME_HEADER}
-        ${GAME_SOURCE}
+        ${QT_EDITOR_GAME_HEADER}
+        ${QT_EDITOR_GAME_SOURCE}
         )
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${APP_NAME}
             MANUAL_FINALIZATION
@@ -65,7 +57,9 @@ target_link_libraries(${APP_NAME} PRIVATE
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
         )
-
+if (NOT _AX_USE_PREBUILT)
+    target_link_libraries(${APP_NAME} PRIVATE ${_AX_CORE_LIB})
+endif()
 set_target_properties(${APP_NAME} PROPERTIES
         CXX_STANDARD 17
         MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
@@ -77,6 +71,8 @@ set_target_properties(${APP_NAME} PROPERTIES
 target_include_directories(${APP_NAME}
         PRIVATE ${CMAKE_SOURCE_DIR}/src
         PRIVATE ${CMAKE_SOURCE_DIR}/ui
+        PRIVATE ${CMAKE_SOURCE_DIR}/Classes
+        PRIVATE ${_AX_ROOT_PATH}/core/audio
         )
 
 install(TARGETS ${APP_NAME}

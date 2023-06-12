@@ -13,7 +13,7 @@ else()
 endif()
 
 # Disable Axmol extension
-set(AX_ENABLE_EXT_FAIRYGUI OFF CACHE "" INTERNAL FORCE)
+#set(AX_ENABLE_EXT_FAIRYGUI OFF CACHE "" INTERNAL FORCE)
 
 if(NOT DEFINED BUILD_ENGINE_DONE) # to test cocos2dGame into root project
     if(XCODE)
@@ -66,24 +66,21 @@ set(GAME_DEFINITIONS ${GAME_DEFINITIONS} -DCMAKE_APP_VERSION="${APP_VERSION}") #
 #add_definitions(-DCMAKE_APP_NAME="${APP_NAME}")
 
 # add cross-platforms source files and header files
-list(APPEND GAME_HEADER
-    Classes/AppDelegate.h
-    Classes/HelloWorldScene.h
-    )
-list(APPEND GAME_SOURCE
-    Classes/AppDelegate.cpp
-    Classes/HelloWorldScene.cpp
-    )
-
+file(GLOB_RECURSE GAME_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h)
+file(GLOB_RECURSE GAME_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.cpp)
+# the same for editor
+if (QT_EDITOR)
+    file(GLOB_RECURSE QT_EDITOR_GAME_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.h)
+    file(GLOB_RECURSE QT_EDITOR_GAME_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Classes/*.cpp)
+    list(APPEND QT_EDITOR_GAME_SOURCE ${common_res_files})
+endif()
 # note place here your add_subdirectory()
 
 
 # applying definitions from generic
 add_definitions(${GAME_DEFINITIONS})
 
-if (QT_EDITOR)
-    list(APPEND GAME_SOURCE ${common_res_files})
-elseif(ANDROID)
+if(ANDROID)
     # the APP_NAME should match on AndroidManifest.xml
     list(APPEND GAME_SOURCE
          proj.android/app/jni/main.cpp
@@ -163,7 +160,7 @@ if (NOT _AX_USE_PREBUILT)
 endif()
 
 target_include_directories(${APP_NAME}
-        PRIVATE Classes
+        PRIVATE ${CMAKE_SOURCE_DIR}/Classes
         PRIVATE ${_AX_ROOT_PATH}/core/audio
 )
 target_compile_features(${APP_NAME} PRIVATE cxx_std_17)
